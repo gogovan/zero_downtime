@@ -16,30 +16,49 @@ RSpec.describe ZeroDowntime::Deprecatable do
     self.table_name = :people
   end
 
+  let(:deprecated_class) { PersonWithNameDeprecated }
+  let(:multi_deprecated_class) { PersonWithFirstAndLastNamesDeprecated }
+  let(:undeprecated_class) { PersonWithoutDeprecation }
+
   describe 'with a deprecated column' do
-    subject { PersonWithNameDeprecated.first }
+    subject { deprecated_class }
 
-    it 'has no reader for the deprecated column' do
-      expect do
-        subject.name
-      end.to raise_error(ZeroDowntime::DeprecatedColumn)
+    it 'ignores the column on create' do
+      created = subject.create!
+      expect(created.first_name).to eq 'unknown'
+      expect(created.last_name).to eq 'unknown'
     end
 
-    it 'has no writer for the deprecated column' do
-      expect do
-        subject.name = 'Tess'
-      end.to raise_error(ZeroDowntime::DeprecatedColumn)
+    it "doesn't show the column name" do
+      expect(subject.column_names).to(
+        eq %w( id first_name last_name ))
     end
 
-    it "doesn't affect normal columns" do
-      subject.first_name = 'Tessa'
-      subject.save!
-      subject.first_name
+    context 'for an instance' do
+      subject { deprecated_class.first }
+
+      it 'has no reader for the deprecated column' do
+        expect do
+          subject.name
+        end.to raise_error(ZeroDowntime::DeprecatedColumn)
+      end
+
+      it 'has no writer for the deprecated column' do
+        expect do
+          subject.name = 'Tess'
+        end.to raise_error(ZeroDowntime::DeprecatedColumn)
+      end
+
+      it "doesn't affect normal columns" do
+        subject.first_name = 'Tessa'
+        subject.save!
+        subject.first_name
+      end
     end
   end
 
   describe 'with multiple deprecated columns' do
-    subject { PersonWithFirstAndLastNamesDeprecated.first }
+    subject { multi_deprecated_class.first }
 
     it 'has no reader for either deprecated column' do
       expect do
@@ -49,6 +68,44 @@ RSpec.describe ZeroDowntime::Deprecatable do
       expect do
         subject.last_name
       end.to raise_error(ZeroDowntime::DeprecatedColumn)
+    end
+  end
+
+  describe 'without deprecated columns' do
+    subject { undeprecated_class }
+
+    it 'works as usual' do
+      subject.count
+      subject.all.to_a
+      subject.first
+    end
+  end
+
+  describe 'removing the deprecated column' do
+    it "doesn't break the class" do
+      deprecated_class.all.to_a
+      deprecated = deprecated_class.create!
+
+      undeprecated_class.all.to_a
+      undeprecated = undeprecated_class.create!
+
+      ActiveRecord::Schema.define(version: 1) do
+        remove_column :people, :name
+      end
+
+      deprecated_class.all.to_a
+      deprecated_class.create!
+
+      undeprecated_class.all.to_a
+
+      #expect do
+        undeprecated_class.create!
+      #end.to raise_error(ActiveRecord::StatementInvalid)
+
+      undeprecated.name = 'new name'
+      expect do
+        undeprecated.save!
+      end.to raise_error(ActiveRecord::StatementInvalid)
     end
   end
 end

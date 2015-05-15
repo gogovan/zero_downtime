@@ -27,14 +27,17 @@ module ZeroDowntime
       # so it will be ignore by activerecord
       # we can remove it once the deprecation is deployed
       def deprecate_column(column_name)
-        self.deprecated_columns ||= []
         deprecate_column_reader(column_name)
         deprecate_column_writer(column_name)
+
+        self.deprecated_columns ||= []
         deprecated_columns << column_name.to_s
       end
 
       def columns_with_deprecations
         all_columns = columns_without_deprecations
+        return all_columns unless deprecated_columns
+
         all_columns.reject { |c| deprecated_columns.include?(c.name) }
       end
 
