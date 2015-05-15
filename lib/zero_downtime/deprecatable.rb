@@ -1,7 +1,6 @@
 require 'active_support/concern'
 
 module ZeroDowntime
-
   class DeprecatedColumn < RuntimeError
   end
 
@@ -13,8 +12,6 @@ module ZeroDowntime
   #   end
   #
   module Deprecatable
-
-
     extend ActiveSupport::Concern
 
     included do
@@ -26,7 +23,6 @@ module ZeroDowntime
     end
 
     class_methods do
-
       # deprecate a given column
       # so it will be ignore by activerecord
       # we can remove it once the deprecation is deployed

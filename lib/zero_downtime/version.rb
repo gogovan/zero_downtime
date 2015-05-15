@@ -1,3 +1,3 @@
-module ZeroDowntime
-  VERSION = "0.1.0"
+module ZeroDowntime # :nodoc:
+  VERSION = '0.1.0'
 end

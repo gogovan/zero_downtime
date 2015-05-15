@@ -1,19 +1,18 @@
 require 'support/models'
 
 RSpec.describe ZeroDowntime::Deprecatable do
-
-  class PersonWithNameDeprecated < ActiveRecord::Base
+  class PersonWithNameDeprecated < ActiveRecord::Base # :nodoc:
     self.table_name = :people
     deprecate_column :name
   end
 
-  class PersonWithFirstAndLastNamesDeprecated < ActiveRecord::Base
+  class PersonWithFirstAndLastNamesDeprecated < ActiveRecord::Base # :nodoc:
     self.table_name = :people
     deprecate_column :first_name
     deprecate_column :last_name
   end
 
-  class PersonWithoutDeprecation < ActiveRecord::Base
+  class PersonWithoutDeprecation < ActiveRecord::Base # :nodoc:
     self.table_name = :people
   end
 
@@ -52,5 +51,4 @@ RSpec.describe ZeroDowntime::Deprecatable do
       end.to raise_error(ZeroDowntime::DeprecatedColumn)
     end
   end
-
 end

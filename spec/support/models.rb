@@ -5,8 +5,8 @@ ActiveRecord::Base.establish_connection(
   database: ':memory:'
 )
 
-ActiveRecord::Schema.define(:version => 0) do
-  create_table :people, :force => true do |t|
+ActiveRecord::Schema.define(version: 0) do
+  create_table :people, force: true do |t|
     t.string :name, :first_name, :last_name
   end
 end
