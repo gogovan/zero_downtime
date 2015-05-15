@@ -11,6 +11,11 @@ ActiveRecord::Schema.define(:version => 0) do
   end
 end
 
-require 'zero_downtime/deprecatable'
+class Person < ActiveRecord::Base
+end
 
+Person.create!(name: 'Test Ting', first_name: 'Tess', last_name: 'Ting')
+
+require 'zero_downtime/deprecatable'
+require 'pry'
 ActiveRecord::Base.send :include, ZeroDowntime::Deprecatable

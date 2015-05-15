@@ -18,32 +18,39 @@ RSpec.describe ZeroDowntime::Deprecatable do
   end
 
   describe 'with a deprecated column' do
-    subject { PersonWithNameDeprecated.new }
+    subject { PersonWithNameDeprecated.first }
 
     it 'has no reader for the deprecated column' do
       expect do
         subject.name
-      end.to raise_error(NoMethodError)
+      end.to raise_error(ZeroDowntime::DeprecatedColumn)
     end
 
     it 'has no writer for the deprecated column' do
       expect do
         subject.name = 'Tess'
-      end.to raise_error(NoMethodError)
+      end.to raise_error(ZeroDowntime::DeprecatedColumn)
+    end
+
+    it "doesn't affect normal columns" do
+      subject.first_name = 'Tessa'
+      subject.save!
+      subject.first_name
     end
   end
 
   describe 'with multiple deprecated columns' do
-    subject { PersonWithFirstAndLastNamesDeprecated.new }
+    subject { PersonWithFirstAndLastNamesDeprecated.first }
 
     it 'has no reader for either deprecated column' do
       expect do
         subject.first_name
-      end.to raise_error(NoMethodError)
+      end.to raise_error(ZeroDowntime::DeprecatedColumn)
 
       expect do
         subject.last_name
-      end.to raise_error(NoMethodError)
+      end.to raise_error(ZeroDowntime::DeprecatedColumn)
     end
   end
+
 end

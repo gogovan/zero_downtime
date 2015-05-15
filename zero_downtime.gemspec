@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport', '>= 3.2.0', '< 5.0.0'
   spec.add_dependency 'activerecord', '>= 3.2.0', '< 5.0.0'
 
+  spec.add_development_dependency 'pry'
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'appraisal', '~> 2.0.0'
   spec.add_development_dependency 'bundler', '~> 1.9'
