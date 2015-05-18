@@ -2,40 +2,62 @@
 
 [![Build Status](https://travis-ci.org/matthewrudy/zero_downtime.svg?branch=master)](https://travis-ci.org/matthewrudy/zero_downtime)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/zero_downtime`. To experiment with that code, run `bin/console` for an interactive prompt.
+This is a minimal library to help run zero-downtime with rails and activerecord
 
-TODO: Delete this and the text above, and describe your gem
+## Deprecated Columns
 
-## Installation
+The most common use case is deprecating a column.
 
-Add this line to your application's Gemfile:
+If you just drop a column,
+it will break any existing process that has cached the columns.
 
-```ruby
-gem 'zero_downtime'
+### Example
+
+We have a model `Person`
+
+It has a single column `:name`
+
+However we want to split this up into
+
+  * :first_name
+  * :last_name
+
+We add a migration
+
+```
+class AddFirstAndLastNamesToPeople < ActiveRecord::Migration
+  class SafePersone # safe model
+    self.table_name :people
+  end
+
+  def up
+    add_column :people, :first_name
+    add_column :people, :last_name
+
+    SafePerson.find_each do |person|
+      *first_names, last_name = person.name.split(" ")
+
+      person.first_name = first_names.join(" ")
+      person.last_name = last_name
+      person.save!
+    end
+  end
+end
 ```
 
-And then execute:
+That's fine,
+but what to do with the deprecated :name column?
 
-    $ bundle
+The answer, mark it as deprecated
 
-Or install it yourself as:
+```
+class Person < ActiveRecord::Base
+  deprecated_column :name
+end
+```
 
-    $ gem install zero_downtime
+This will
 
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release` to create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-1. Fork it ( https://github.com/[my-github-username]/zero_downtime/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+* Let us easily find it later
+* Stop anyone from using the column by accident
+* Ensure that once its deployed we can safely remove the column
