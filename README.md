@@ -52,7 +52,7 @@ The answer, mark it as deprecated
 
 ```
 class Person < ActiveRecord::Base
-  deprecated_column :name
+  deprecate_column :name
 end
 ```
 
