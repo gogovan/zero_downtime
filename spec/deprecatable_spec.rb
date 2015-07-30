@@ -6,6 +6,11 @@ RSpec.describe ZeroDowntime::Deprecatable do
     deprecate_column :name
   end
 
+  class PersonWithNameDeprecatedAndNil < ActiveRecord::Base # :nodoc:
+    self.table_name = :people
+    deprecate_column :name, nil: true
+  end
+
   class PersonWithFirstAndLastNamesDeprecated < ActiveRecord::Base # :nodoc:
     self.table_name = :people
     deprecate_column :first_name
@@ -41,6 +46,14 @@ RSpec.describe ZeroDowntime::Deprecatable do
         expect do
           subject.name
         end.to raise_error(ZeroDowntime::DeprecatedColumn)
+      end
+
+      context 'with the nil reader' do
+        subject { PersonWithNameDeprecatedAndNil.first }
+
+        it 'has the reader return nil' do
+          expect(subject.name).to be_nil
+        end
       end
 
       it 'has no writer for the deprecated column' do
