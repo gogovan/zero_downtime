@@ -49,6 +49,20 @@ RSpec.describe ZeroDowntime::Deprecatable do
         end.to raise_error(ZeroDowntime::DeprecatedColumn)
       end
 
+      it 'skips the column from attributes' do
+        expect(subject.attributes).to eq(
+          'id' => subject.id,
+          'first_name' => subject.first_name,
+          'last_name' => subject.last_name
+        )
+      end
+
+      it 'skips the column from attribute_names' do
+        expect(subject.attribute_names).to eq(
+          ['id', 'first_name', 'last_name']
+        )
+      end
+
       it "doesn't affect normal columns" do
         subject.first_name = 'Tessa'
         subject.save!
@@ -78,6 +92,25 @@ RSpec.describe ZeroDowntime::Deprecatable do
       subject.count
       subject.all.to_a
       subject.first
+    end
+
+    context 'for an instance' do
+      subject { undeprecated_class.first }
+
+      it 'shows all the columns' do
+        expect(subject.attributes).to eq(
+          'id' => subject.id,
+          'first_name' => subject.first_name,
+          'last_name' => subject.last_name,
+          'name' => subject.name
+        )
+      end
+
+      it 'shows all columns for attribute_names' do
+        expect(subject.attribute_names).to eq(
+          ['id', 'name', 'first_name', 'last_name']
+        )
+      end
     end
   end
 

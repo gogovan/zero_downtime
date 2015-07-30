@@ -29,6 +29,7 @@ module ZeroDowntime
       def deprecate_column(column_name)
         deprecate_column_reader(column_name)
         deprecate_column_writer(column_name)
+        override_attribute_methods
 
         self.deprecated_columns ||= []
         deprecated_columns << column_name.to_s
@@ -42,6 +43,23 @@ module ZeroDowntime
       end
 
       private
+
+      def override_attribute_methods
+        return false if @attribute_methods_overriden
+
+        class_eval do
+          def attributes_with_deprecations
+            attributes_without_deprecations.except(*self.class.deprecated_columns)
+          end
+          alias_method_chain :attributes, :deprecations
+
+          def attribute_names_with_deprecations
+            attribute_names_without_deprecations - self.class.deprecated_columns
+          end
+          alias_method_chain :attribute_names, :deprecations
+        end
+        @attribute_methods_overriden = true
+      end
 
       def deprecate_column_reader(column_name)
         define_method(column_name) do
