@@ -1,6 +1,6 @@
 # ZeroDowntime
 
-[![Build Status](https://travis-ci.org/matthewrudy/zero_downtime.svg?branch=master)](https://travis-ci.org/matthewrudy/zero_downtime)
+[![Build Status](https://travis-ci.org/gogovan/zero_downtime.svg?branch=master)](https://travis-ci.org/gogovan/zero_downtime)
 
 This is a minimal library to help run zero-downtime with rails and activerecord
 
