@@ -3,9 +3,11 @@ rvm:
   - 2.0.0
   - 2.1.5
   - 2.2.2
+
 gemfile:
-  - gemfiles/rails4.gemfile
-  - gemfiles/rails41.gemfile
-  - gemfiles/rails42.gemfile
+  - gemfiles/rails_3.2.gemfile
+  - gemfiles/rails_4.0.gemfile
+  - gemfiles/rails_4.1.gemfile
+  - gemfiles/rails_4.2.gemfile
 
 script: bundle exec rspec spec
