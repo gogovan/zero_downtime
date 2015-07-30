@@ -22,7 +22,7 @@ module ZeroDowntime
       end
     end
 
-    class_methods do
+    module ClassMethods
       # deprecate a given column
       # so it will be ignore by activerecord
       # we can remove it once the deprecation is deployed
