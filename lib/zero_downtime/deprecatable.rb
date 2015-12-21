@@ -18,7 +18,26 @@ module ZeroDowntime
       class_attribute :deprecated_columns
 
       class << self
-        alias_method_chain :columns, :deprecations
+        prepend ColumnsWithDeprecations
+      end
+    end
+
+    module ColumnsWithDeprecations
+      def columns
+        all_columns = super
+        return all_columns unless deprecated_columns
+
+        all_columns.reject { |c| deprecated_columns.include?(c.name) }
+      end
+    end
+
+    module AttributesWithDeprecations
+      def attributes
+        super.except(*self.class.deprecated_columns)
+      end
+
+      def attribute_names
+        super - self.class.deprecated_columns
       end
     end
 
@@ -35,28 +54,13 @@ module ZeroDowntime
         deprecated_columns << column_name.to_s
       end
 
-      def columns_with_deprecations
-        all_columns = columns_without_deprecations
-        return all_columns unless deprecated_columns
-
-        all_columns.reject { |c| deprecated_columns.include?(c.name) }
-      end
-
       private
 
       def override_attribute_methods
         return false if @attribute_methods_overriden
 
         class_eval do
-          def attributes_with_deprecations
-            attributes_without_deprecations.except(*self.class.deprecated_columns)
-          end
-          alias_method_chain :attributes, :deprecations
-
-          def attribute_names_with_deprecations
-            attribute_names_without_deprecations - self.class.deprecated_columns
-          end
-          alias_method_chain :attribute_names, :deprecations
+          prepend AttributesWithDeprecations
         end
         @attribute_methods_overriden = true
       end
